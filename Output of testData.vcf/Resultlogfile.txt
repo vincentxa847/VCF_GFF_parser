@@ -1,0 +1,3 @@
+Files given at the command line are './Data/testData.vcf.gz', './Data/PlasmoDB-54_Pfalciparum3D7.gff', './Data/PlasmoDB-54_Pfalciparum3D7_Genome.fasta' 
+The count of variant where QUAL <= 20 is 0 
+The location of the output files is C:\Users\user\Desktop\Msc_review\Biological Computing in Python 
