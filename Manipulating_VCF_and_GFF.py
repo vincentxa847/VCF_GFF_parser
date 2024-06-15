@@ -8,6 +8,7 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('data' , help="Take in VCF,GFF and fasta file", nargs='*') # input more than one files
+parser.add_argument('--output', default="Result", help="File name of output table and plot", required=False)
 args = parser.parse_args()
 VCF = ""
 GFF = ""
@@ -21,21 +22,21 @@ for InputData in args.data:
         FASTA = str(InputData)
     else:
         error = "invalid data was input"
-        with open("2802815logfile.txt", "w") as LogFile:
+        with open(f"{args.output}logfile.txt", "w") as LogFile:
             LogFile.write("file given at the command line {} \nerror happened when running script, {}".format(str(args.data).replace("[","").replace("]",""),error))
         raise SystemExit(1)
 
 if VCF == "" or GFF == "" or FASTA == "" :
     error = "incomplete file was input"
-    with open("2802815logfile.txt", "w") as LogFile:
+    with open(f"{args.output}logfile.txt", "w") as LogFile:
         LogFile.write("file given at the command line {} \nerror happened when running script, {}".format(str(args.data).replace("[", "").replace("]", ""), error))
     raise SystemExit(1)
 
 # Handle gff file
-if not os.path.isfile("2802815.db"):
-    db = gffutils.create_db(GFF, dbfn="2802815.db")
+if not os.path.isfile("gff.db"):
+    db = gffutils.create_db(GFF, dbfn="gff.db")
 else:
-    db = gffutils.FeatureDB("2802815.db", keep_order=True)
+    db = gffutils.FeatureDB("gff.db", keep_order=True)
 # Read in vcf file
 try:
     vcf_Reader1 = vcf.Reader(filename=VCF)
@@ -79,7 +80,7 @@ for record in vcf_Reader1:
                             Location = Location + cdsLength
                 else:
                     error = "GFF file in bad format"
-                    with open("2802815logfile.txt", "w") as LogFile:
+                    with open(f"{args.output}logfile.txt", "w") as LogFile:
                         LogFile.write("file given at the command line {} \nerror happened when running script, {}".format(str(args.data).replace("[", "").replace("]", ""), error))
                         raise SystemExit(1)
                 ProteinLocation = math.ceil(Location / 3)
@@ -144,12 +145,12 @@ fig = plt.figure()
 variantType = ["Non-synonymous","Synonymous","Non-coding"]
 variantNumber = [NonSynonymousNumber,SynonymousNumber,NonCodingNumber]
 plt.bar(variantType,variantNumber)
-plt.title("2802815 bar plot")
-fig.savefig("2802815.png")
+plt.title(f"{args.output} bar plot")
+fig.savefig(f"{args.output}.png")
 plt.clf()
 
 # For tab-seperated table
-with open("2802815.tsv","w") as tsvfile:
+with open(f"{args.output}.tsv","w") as tsvfile:
     tsvfile.write("CHROM  POS REF ALT Type    Transcript  Protein Location  Ref AA  Alt AA \n") # header
     for variant in WholeData:
         row = "\t".join(variant)
@@ -157,5 +158,5 @@ with open("2802815.tsv","w") as tsvfile:
 
 # For log file (txt format) # situation without error
 # output files will be store at current directory , so using getcwd to represent the location of thr output files
-with open("2802815logfile.txt", "w") as LogFile:
+with open(f"{args.output}logfile.txt", "w") as LogFile:
     LogFile.write("Files given at the command line are {} \nThe count of variant where QUAL <= 20 is {} \nThe location of the output files is {} \n".format(str(args.data).replace("[","").replace("]",""),VariantsQualitySmallerThan20,os.getcwd()))
